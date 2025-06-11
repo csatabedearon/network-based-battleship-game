@@ -1,0 +1,20 @@
+# Git files
+.git
+.gitignore
+
+# Python virtual environment
+backend/venv
+__pycache__/
+*.pyc
+
+# Frontend dependencies (we install them fresh inside the container)
+frontend/node_modules
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# IDE / OS specific
+.vscode/
+.idea/
+*.DS_Store

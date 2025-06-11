@@ -3,16 +3,32 @@
 import uuid
 import random
 import string
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_cors import CORS
 
 from game_logic import create_board, place_ships, process_move, check_win
 
 # --- APPLICATION SETUP ---
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../static', static_url_path='/')
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# --- SERVE THE REACT APP ---
+# This route will serve the 'index.html' file of our React app
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
+# This is a catch-all for any other routes, to support React Router in the future
+@app.route('/<path:path>')
+def serve_static(path):
+    # This attempts to serve a file if it exists, otherwise serves index.html
+    # This is useful for client-side routing.
+    try:
+        return send_from_directory(app.static_folder, path)
+    except:
+        return send_from_directory(app.static_folder, 'index.html')
 
 # --- DATA STRUCTURES ---
 players = {}  # Maps player SID to their username. e.g., {'sid123': 'Alice'}
