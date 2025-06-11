@@ -3,7 +3,9 @@ import io from 'socket.io-client';
 import Board from './components/Board';
 
 // Connect to the backend server.
-const socket = io('http://localhost:5001');
+const socket = io({
+  path: '/battleship/socket.io'
+});
 
 function App() {
   // --- STATE MANAGEMENT ---

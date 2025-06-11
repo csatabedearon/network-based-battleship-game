@@ -10,7 +10,7 @@ from flask_cors import CORS
 from game_logic import create_board, place_ships, process_move, check_win
 
 # --- APPLICATION SETUP ---
-app = Flask(__name__, static_folder='../static', static_url_path='/')
+app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
