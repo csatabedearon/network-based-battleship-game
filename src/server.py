@@ -1,3 +1,5 @@
+# src/server.py
+
 import json
 import os
 import random
@@ -8,11 +10,10 @@ import time
 import colorama
 from colorama import Back, Fore, Style
 
+from src.config import BOARD_SIZE, HOST, PORT, SHIP_SIZES
+
 # Initialize colorama for colored terminal output
 colorama.init(autoreset=True)
-
-HOST = "localhost"
-PORT = 5555
 
 # Queue to hold waiting players
 waiting_players = []
@@ -25,10 +26,6 @@ active_matches = []
 # Locks for updating connected players and matches safely in multithreading
 players_lock = threading.Lock()
 matches_lock = threading.Lock()
-
-# Board settings
-BOARD_SIZE = 10
-SHIP_SIZES = [5, 4, 3, 3, 2]  # Classic Battleship ship sizes
 
 
 class Player:
@@ -142,7 +139,8 @@ def check_win(board):
 
 def print_boards_side_by_side(board1, board2, player1_name, player2_name):
     # Display two boards side by side for server status monitoring
-    header = f"{player1_name}'s Board{' ' * 19}{player2_name}'s Board"
+    header = f"{player1_name}'s Board{' ' * (2 * BOARD_SIZE - len(player1_name))}"
+    header += f"{player2_name}'s Board"
     print(header)
     print("-" * len(header))
     header_row = "   " + " ".join([chr(i + ord("A")) for i in range(BOARD_SIZE)])
@@ -331,10 +329,12 @@ def game_session(player1, player2):
         # Send initial messages to both players
         start_message = {
             "status": "paired",
-            "message": "You have been paired with an opponent. Game starting!",
+            "message": f"You have been paired with {player2.username}. Game starting!",
         }
         send_message(player1.socket, start_message)
+        start_message["message"] = f"You have been paired with {player1.username}. Game starting!"
         send_message(player2.socket, start_message)
+
 
         # Send initial boards to both players
         send_message(
@@ -416,7 +416,7 @@ def game_session(player1, player2):
                     message = "You already attacked that position."
                     send_message(
                         current_player.socket,
-                        {"status": "message", "message": message},
+                        {"status": "error", "message": message},
                     )
                     continue  # Let the player try again
 
@@ -435,7 +435,7 @@ def game_session(player1, player2):
 
                 # Notify opponent and send updated own board
                 opponent_message = (
-                    f"The opponent attacked ({row}, {col}) and it was a {result}."
+                    f"The opponent attacked ({chr(col + ord('A'))}{row}) and it was a {result}."
                 )
                 send_message(
                     opponent.socket,
@@ -467,6 +467,9 @@ def game_session(player1, player2):
                 # Swap turns
                 current_player, opponent = opponent, current_player
 
+            except (json.JSONDecodeError, KeyError) as e:
+                print(Fore.RED + f"Invalid message format from client: {e}")
+                continue # Skip turn on bad message
             except Exception as e:
                 print(Fore.RED + f"An error occurred during game: {e}")
                 break
@@ -490,21 +493,29 @@ def game_session(player1, player2):
             pass
 
 
-# Main server function to accept connections and start threads
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
-print(Fore.CYAN + f"Server listening on {HOST}:{PORT}")
-# Start the matchmaking thread
-threading.Thread(target=matchmaking_thread, daemon=True).start()
-while True:
-    try:
-        # Accept new client connections
-        client_socket, address = server.accept()
-        print(f"Accepted connection from {address}")
-        player = Player(client_socket, address)
-        # Start a new thread to handle the client
-        threading.Thread(target=handle_client, args=(player,), daemon=True).start()
-    except Exception as e:
-        print(Fore.RED + f"Error accepting connections: {e}")
-        break
+def main():
+    # Main server function to accept connections and start threads
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen()
+    print(Fore.CYAN + f"Server listening on {HOST}:{PORT}")
+    # Start the matchmaking thread
+    threading.Thread(target=matchmaking_thread, daemon=True).start()
+    while True:
+        try:
+            # Accept new client connections
+            client_socket, address = server.accept()
+            player = Player(client_socket, address)
+            # Start a new thread to handle the client
+            threading.Thread(target=handle_client, args=(player,), daemon=True).start()
+        except KeyboardInterrupt:
+            print(Fore.YELLOW + "\nServer is shutting down.")
+            break
+        except Exception as e:
+            print(Fore.RED + f"Error accepting connections: {e}")
+            break
+    server.close()
+
+
+if __name__ == "__main__":
+    main()

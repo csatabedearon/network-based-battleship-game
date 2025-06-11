@@ -1,3 +1,5 @@
+# src/client.py
+
 import json
 import socket
 import threading
@@ -5,13 +7,10 @@ import threading
 import colorama
 from colorama import Fore, Style
 
+from src.config import BOARD_SIZE, HOST, PORT
+
 # Initialize colorama for colored terminal output
 colorama.init(autoreset=True)
-
-HOST = "localhost"
-PORT = 5555
-
-BOARD_SIZE = 10
 
 
 def send_message(sock, message_dict):
@@ -151,18 +150,33 @@ def handle_server_message(sock, message):
         print("Received unknown message from server.")
 
 
-# Main function to start the client
-username = input("Enter your username: ").strip()
-if not username:
-    username = "Player"
+def main():
+    # Main function to start the client
+    username = input("Enter your username: ").strip()
+    if not username:
+        username = "Player"
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        client_socket.connect((HOST, PORT))
+    except ConnectionRefusedError:
+        print(Fore.RED + "Connection failed. Is the server running?")
+        return
 
-# Send username to server
-username_message = {"type": "username", "data": {"username": username}}
-send_message(client_socket, username_message)
+    # Send username to server
+    username_message = {"type": "username", "data": {"username": username}}
+    send_message(client_socket, username_message)
 
-# Start thread to receive messages from the server
-threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
-threading.Event().wait()  # Wait indefinitely without consuming CPU
+    # Start thread to receive messages from the server
+    thread = threading.Thread(
+        target=receive_messages, args=(client_socket,), daemon=True
+    )
+    thread.start()
+
+    # Keep the main thread alive to allow the daemon thread to run
+    while thread.is_alive():
+        thread.join(1)
+
+
+if __name__ == "__main__":
+    main()
