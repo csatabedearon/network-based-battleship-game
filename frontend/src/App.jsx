@@ -190,41 +190,45 @@ function App() {
       case 'playing':
         return (
           <div className="game-area">
-            <div className="board-container">
-              <h2>Your Board</h2>
-              <Board boardData={myBoard} isOpponentBoard={false} />
-            </div>
-            <div className="board-container">
-              <h2>Opponent's Board</h2>
-              <Board 
-                boardData={opponentViewBoard} 
-                onCellClick={handleCellClick}
-                isOpponentBoard={true}
-              />
+            <div className="boards-wrapper">
+              <div className="board-container">
+                <h2>Your Board</h2>
+                <Board boardData={myBoard} isOpponentBoard={false} />
+              </div>
+              <div className="board-container">
+                <h2>Opponent's Board</h2>
+                <Board 
+                  boardData={opponentViewBoard} 
+                  onCellClick={handleCellClick}
+                  isOpponentBoard={true}
+                />
+              </div>
             </div>
           </div>
         );
 
       case 'game_over':
         return (
-            <div className="game-area">
-                <div className="board-container">
-                    <h2>Your Final Board</h2>
-                    <Board boardData={myBoard} isOpponentBoard={false} />
-                </div>
-                <div className="board-container">
-                    <h2>Opponent's Final Board</h2>
-                    <Board 
-                        boardData={finalOpponentBoard} 
-                        isOpponentBoard={true}
-                    />
-                </div>
-                <div className="game-over-modal">
-                    <h1>Game Over</h1>
-                    <h2>{winner === username ? "You Win!" : "You Lose!"}</h2>
-                    <button onClick={playAgain}>Play Again</button>
-                </div>
+          <div className="game-area">
+            <div className="boards-wrapper">
+              <div className="board-container">
+                  <h2>Your Final Board</h2>
+                  <Board boardData={myBoard} isOpponentBoard={false} />
+              </div>
+              <div className="board-container">
+                  <h2>Opponent's Final Board</h2>
+                  <Board 
+                      boardData={finalOpponentBoard} 
+                      isOpponentBoard={true}
+                  />
+              </div>
             </div>
+            <div className="game-over-modal">
+              <h1>Game Over</h1>
+              <h2>{winner === username ? "You Win!" : "You Lose!"}</h2>
+              <button onClick={playAgain}>Play Again</button>
+            </div>
+          </div>
         );
 
       default:

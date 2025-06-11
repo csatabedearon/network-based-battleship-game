@@ -4,22 +4,22 @@ import Cell from './Cell';
 // The Board component receives props: boardData, onCellClick, and isOpponentBoard
 function Board({ boardData, onCellClick, isOpponentBoard }) {
   return (
-    <div className="board">
-      {/* Map through each row of the board data */}
-      {boardData.map((row, rowIndex) => (
-        <div key={rowIndex} className="board-row">
-          {/* Map through each cell in the row */}
-          {row.map((cellValue, colIndex) => (
-            <Cell
-              key={`${rowIndex}-${colIndex}`}
-              value={cellValue}
-              // Pass the click handler to the Cell, but only if it's the opponent's board
-              onClick={() => isOpponentBoard && onCellClick(rowIndex, colIndex)}
-              isOpponentBoard={isOpponentBoard}
-            />
-          ))}
-        </div>
-      ))}
+    // We add a 'data-is-opponent' attribute to help with CSS styling (e.g., for the hover effect)
+    <div className="board" data-is-opponent={isOpponentBoard}>
+      {/* 
+        We now map directly to Cell components. 
+        The nested map will produce a single flat list of 100 cells,
+        which is exactly what the CSS grid layout expects.
+      */}
+      {boardData.map((row, rowIndex) => 
+        row.map((cellValue, colIndex) => (
+          <Cell
+            key={`${rowIndex}-${colIndex}`}
+            value={cellValue}
+            onClick={() => isOpponentBoard && onCellClick(rowIndex, colIndex)}
+          />
+        ))
+      )}
     </div>
   );
 }
