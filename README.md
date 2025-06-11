@@ -2,8 +2,6 @@
 
 A classic game of Battleship playable over a local network. This project features a client-server architecture where a central server manages matchmaking and game state, allowing two clients to connect and play against each other in a turn-based battle.
 
-
-
 ## Features
 
 - **Client-Server Architecture**: A robust server handles multiple game sessions and player connections.
@@ -14,18 +12,20 @@ A classic game of Battleship playable over a local network. This project feature
 - **Live Server Dashboard**: The server console provides a real-time overview of connected players, active matches, and the current state of all game boards.
 
 ## Project Structure
-network-based-battleship-game/
-├── .gitignore # Files for Git to ignore
-├── README.md # You are here!
-├── requirements.txt # Project dependencies
-├── run_2_clients.bat # Script to start two clients (server must be running)
-├── run_game.bat # Script to start the server and two clients
-└── src/
-├── init.py # Makes 'src' a Python package
-├── client.py # The game client logic
-├── config.py # Shared configuration (host, port, etc.)
-└── server.py # The game server logic
 
+```
+network-based-battleship-game/
+├── .gitignore          # Files for Git to ignore
+├── README.md           # You are here!
+├── requirements.txt    # Project dependencies
+├── run_2_clients.bat   # Script to start two clients (server must be running)
+├── run_game.bat        # Script to start the server and two clients
+└── src/
+    ├── __init__.py     # Makes 'src' a Python package
+    ├── client.py       # The game client logic
+    ├── config.py       # Shared configuration (host, port, etc.)
+    └── server.py       # The game server logic
+```
 
 ## Prerequisites
 
@@ -87,4 +87,3 @@ If you prefer to run the components separately or are not on Windows, follow the
 4.  Your board (with your ships marked 'S') and an empty opponent's board will be displayed.
 5.  When it's your turn, enter coordinates to fire at (e.g., `A5`, `C0`, `J9`).
 6.  The game ends when one player has sunk all of the opponent's ships. `X` marks a hit, and `O` marks a miss.
-
