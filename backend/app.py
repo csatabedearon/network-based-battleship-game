@@ -12,7 +12,7 @@ from game_logic import create_board, place_ships, process_move, check_win
 # --- APPLICATION SETUP ---
 app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="https://csatabedearon.info")
 
 # --- SERVE THE REACT APP ---
 # This route will serve the 'index.html' file of our React app

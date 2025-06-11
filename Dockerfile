@@ -17,27 +17,15 @@ COPY frontend/ .
 RUN npm run build
 
 
-# === STAGE 2: Build the Python Backend & Final Image ===
-# We start fresh with a lean Python image for our final product.
+# --- STAGE 2: Final Image ---
 FROM python:3.11-slim
-
-# Set the working directory for the backend
 WORKDIR /app
-
-# Install Gunicorn, a production-ready web server for Python.
-# We don't use the built-in Flask server for production.
-RUN pip install gunicorn Flask Flask-SocketIO Flask-Cors
-
-# Copy the built frontend files from the 'builder' stage into a 'static' folder.
-# This is the magic of multi-stage builds.
+# ADD eventlet to the list of packages to install
+RUN pip install gunicorn Flask Flask-SocketIO Flask-Cors eventlet
+# The built frontend is copied here
 COPY --from=builder /app/frontend/dist /app/static
-
-# Copy the backend source code
 COPY backend/ .
-
-# Expose the port the container will run on.
 EXPOSE 5001
-
-# The command to run the application using the Gunicorn server.
-# It will run 4 worker processes and bind to port 5001, accessible from anywhere inside the container.
-CMD ["gunicorn", "--workers", "4", "--bind", "0.0.0.0:5001", "app:app"]
+# CHANGE the CMD to use the eventlet worker class.
+# It is also recommended to start with 1 worker for eventlet.
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5001", "app:app"]
